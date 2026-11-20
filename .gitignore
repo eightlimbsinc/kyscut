@@ -1,0 +1,7 @@
+node_modules
+dist
+artifact
+.DS_Store
+hero-video/public/clipper/
+hero-video/out/
+blender/*.blend1
