@@ -46,22 +46,6 @@ export function createWork3D({ canvas, cuts, onOpen, onActive }) {
     return group;
   });
 
-  // Gold dust along the tunnel
-  const DUST = window.matchMedia('(max-width: 640px)').matches ? 900 : 2200;
-  const dustGeo = new THREE.BufferGeometry();
-  const pos = new Float32Array(DUST * 3);
-  for (let i = 0; i < DUST; i++) {
-    pos[i * 3] = (Math.random() - 0.5) * 14;
-    pos[i * 3 + 1] = (Math.random() - 0.5) * 9;
-    pos[i * 3 + 2] = 6 - Math.random() * (cuts.length * SPACING + 12);
-  }
-  dustGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const dust = new THREE.Points(
-    dustGeo,
-    new THREE.PointsMaterial({ color: 0xe3c27a, size: 0.035, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending })
-  );
-  scene.add(dust);
-
   // State
   const startZ = 6;
   const endZ = -(cuts.length - 1) * SPACING + 2.5;
@@ -119,8 +103,10 @@ export function createWork3D({ canvas, cuts, onOpen, onActive }) {
 
     camZ += (startZ + (endZ - startZ) * progress - camZ) * Math.min(1, dt * 6);
     smoothPointer.lerp(pointer, Math.min(1, dt * 3));
-    camera.position.set(smoothPointer.x * 0.6, smoothPointer.y * 0.4, camZ);
-    camera.lookAt(smoothPointer.x * 0.2, smoothPointer.y * 0.15, camZ - 6);
+    // On wide screens slide the view so the cards pass to the right of the heading.
+    const shift = camera.aspect > 1.2 ? -2.4 : 0;
+    camera.position.set(shift + smoothPointer.x * 0.6, smoothPointer.y * 0.4, camZ);
+    camera.lookAt(shift + smoothPointer.x * 0.2, smoothPointer.y * 0.15, camZ - 6);
     camera.rotation.z = Math.sin(progress * Math.PI * 2) * 0.06;
 
     raycaster.setFromCamera(ndc, camera);
@@ -150,7 +136,6 @@ export function createWork3D({ canvas, cuts, onOpen, onActive }) {
       lastActive = nearest;
       onActive(nearest);
     }
-    dust.rotation.z = time * 0.02;
     renderer.render(scene, camera);
   }
 
