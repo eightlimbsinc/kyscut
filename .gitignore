@@ -5,3 +5,4 @@ artifact
 hero-video/public/clipper/
 hero-video/out/
 blender/*.blend1
+.netlify
