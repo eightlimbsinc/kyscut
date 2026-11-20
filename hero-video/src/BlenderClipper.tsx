@@ -43,12 +43,12 @@ export const BlenderClipper: React.FC = () => {
           mixBlendMode: "screen",
         }}
       />
-      {/* Fade up from black and dip back to black so the website loop is seamless */}
+      {/* Dip to black at the end; the site then fades back up to the opening frame */}
       <AbsoluteFill
         name="Loop dip"
         style={{
           backgroundColor: "#000",
-          opacity: interpolate(frame, [0, 10, CLIPPER_FRAMES - 14, CLIPPER_FRAMES - 1], [1, 0, 0, 1], {
+          opacity: interpolate(frame, [CLIPPER_FRAMES - 14, CLIPPER_FRAMES - 1], [0, 1], {
             extrapolateLeft: "clamp",
             extrapolateRight: "clamp",
             easing: Easing.bezier(0.33, 1, 0.68, 1),

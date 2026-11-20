@@ -206,6 +206,7 @@ button { font: inherit; color: inherit; }
   background: var(--ink);
 }
 .hero__video {
+  transition: opacity 900ms var(--ease-out);
   position: absolute;
   inset: 0;
   width: 100%;

@@ -99,21 +99,47 @@ function onScroll() {
 }
 window.addEventListener('scroll', onScroll, { passive: true });
 
-/* ---------- Hero video ---------- */
+/* ---------- Hero video: plays once, then rests on the opening frame ---------- */
 const video = document.querySelector('.hero__video');
 const toggle = document.querySelector('.hero__toggle');
-function setPlaying(play) {
-  if (play) video.play().catch(() => {});
-  else video.pause();
-  toggle.setAttribute('aria-pressed', String(!play));
-  toggle.setAttribute('aria-label', play ? 'Pause background video' : 'Play background video');
+let finished = false;
+function setToggle(playing) {
+  toggle.setAttribute('aria-pressed', String(!playing));
+  toggle.setAttribute('aria-label', playing ? 'Pause clipper animation' : finished ? 'Replay clipper animation' : 'Play clipper animation');
 }
-toggle.addEventListener('click', () => setPlaying(video.paused));
-if (reduced) setPlaying(false);
-// Pause when scrolled away to save battery.
+function play() {
+  if (finished) {
+    finished = false;
+    video.currentTime = 0;
+  }
+  video.play().catch(() => {});
+  setToggle(true);
+}
+function pause() {
+  video.pause();
+  setToggle(false);
+}
+toggle.addEventListener('click', () => (video.paused ? play() : pause()));
+video.addEventListener('ended', () => {
+  finished = true;
+  // Last frame is black: hide, jump to the opening frame, then fade it back up.
+  video.style.opacity = '0';
+  video.currentTime = 0;
+  video.addEventListener('seeked', () => requestAnimationFrame(() => (video.style.opacity = '1')), { once: true });
+  setToggle(false);
+});
+if (reduced) pause();
+else setToggle(true);
+// Pause mid-animation when scrolled away; resume only if it hasn't finished.
+let pausedByScroll = false;
 new IntersectionObserver(([e]) => {
-  if (toggle.getAttribute('aria-pressed') === 'true') return;
-  e.isIntersecting ? video.play().catch(() => {}) : video.pause();
+  if (!e.isIntersecting && !video.paused) {
+    video.pause();
+    pausedByScroll = true;
+  } else if (e.isIntersecting && pausedByScroll && !finished) {
+    pausedByScroll = false;
+    video.play().catch(() => {});
+  }
 }).observe(video);
 
 /* ---------- Loader + intro ---------- */
